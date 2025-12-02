@@ -82,26 +82,26 @@ class TestSecretEntrancePasswordFinder:
         """Test with negative starting position"""
         assert finder._cumulative_sum([5, 10, -3], starting_position=-20) == [-15, -5, -8]
     
-    # Tests for _count_zero_position_equivalence
+    # Tests for _count_zero_position_equivalence_after_rotation
     def test_count_zero_position_equivalence_no_matches(self, finder):
         """Test when no positions are divisible by n_graduations"""
-        assert finder._count_zero_position_equivalence([1, 2, 3, 50, 99]) == 0
+        assert finder._count_zero_position_equivalence_after_rotation([1, 2, 3, 50, 99]) == 0
     
     def test_count_zero_position_equivalence_single_match(self, finder):
         """Test with single position divisible by n_graduations"""
-        assert finder._count_zero_position_equivalence([50, 100, 150]) == 1
+        assert finder._count_zero_position_equivalence_after_rotation([50, 100, 150]) == 1
     
     def test_count_zero_position_equivalence_multiple_matches(self, finder):
         """Test with multiple positions divisible by n_graduations"""
-        assert finder._count_zero_position_equivalence([100, 200, 300, 50]) == 3
+        assert finder._count_zero_position_equivalence_after_rotation([100, 200, 300, 50]) == 3
     
     def test_count_zero_position_equivalence_with_zero(self, finder):
         """Test with zero in the list"""
-        assert finder._count_zero_position_equivalence([0, 50, 100]) == 2
+        assert finder._count_zero_position_equivalence_after_rotation([0, 50, 100]) == 2
     
     def test_count_zero_position_equivalence_negative_multiples(self, finder):
         """Test with negative multiples of n_graduations"""
-        assert finder._count_zero_position_equivalence([-100, -200, 0, 100]) == 4
+        assert finder._count_zero_position_equivalence_after_rotation([-100, -200, 0, 100]) == 4
     
     # Tests for _load_instructions
     def test_load_instructions_valid(self, tmp_path):
