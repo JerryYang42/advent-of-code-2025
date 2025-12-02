@@ -133,10 +133,10 @@ class InvalidIdIdentifier():
 
 if __name__ == "__main__":
     identifier = InvalidIdIdentifier('input.txt')
-    print("Loaded Ranges:", identifier.ranges)
 
-    print("Day 2, Part 1")
+    print("======Day 2, Part 1======")
     invalid_ids = identifier.search_invalid_ids_in_ranges()
     print("Number of invalid IDs found:", len(invalid_ids))
     print("Sum of invalid IDs found:", identifier.sum_of_invalid_ids_in_ranges())
-
+    print("======Day 2, Part 2======")
+    print("Not implemented yet.")
