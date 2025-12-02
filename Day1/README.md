@@ -21,13 +21,13 @@ uv pip install -e .  # enable editable mode
 Run the src file for print out result
 
 ```zsh
-python3 Day1/src/main/P1.py
+python3 day1/src/main/P1.py
 ```
 
 Run the tests
 
 ```zsh
-uv run pytest Day1/src/test/test_part1.py -v
+uv run pytest day1/src/test/test_SecretEntrancePasswordFinder.py.py -v
 ```
 
 Or run all tests:
@@ -40,7 +40,7 @@ With coverages
 
 ```zsh
 uv add --dev pytest-cov
-uv run pytest --cov=Day1 --cov-report=term-missing
+uv run pytest --cov=day1 --cov-report=term-missing
 ```
 
 FAQ
