@@ -4,10 +4,10 @@ from typing import List
 N_GRADUATIONS = 100
 DIAL_STARTING_POSITION = 50
 DATA_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'resources')
-INPUT_P1_FILENAME = 'input_p1.txt'
-INPUT_P2_FILENAME = 'input_p1.txt'
+INPUT_P1_FILENAME = 'input.txt'
+INPUT_P2_FILENAME = 'input.txt'
 
-# Part 1 Solution
+# Part 1 & 2 Solution
 class SecretEntrancePasswordFinder:
     """Class to find the secret entrance password based on cumulative summation."""
     
