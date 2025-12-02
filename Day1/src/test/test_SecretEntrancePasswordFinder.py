@@ -147,3 +147,60 @@ class TestSecretEntrancePasswordFinder:
         
         with pytest.raises(ValueError, match="Invalid instruction found on line 2"):
             finder._load_instructions()
+
+    # Tests for _count_zero_position_equivalences_exclusively_between
+    def test_count_zero_position_equivalences_exclusively_between_positive_shift_no_matches(self, finder):
+        """Test positive shift with no zero position equivalents in between"""
+        assert finder._count_zero_position_equivalences_exclusively_between(10, 20, 100) == 0
+
+    def test_count_zero_position_equivalences_exclusively_between_positive_shift_single_match(self, finder):
+        """Test positive shift crossing one zero position equivalent"""
+        assert finder._count_zero_position_equivalences_exclusively_between(50, 60, 100) == 1
+
+    def test_count_zero_position_equivalences_exclusively_between_positive_shift_multiple_matches(self, finder):
+        """Test positive shift crossing multiple zero position equivalents"""
+        assert finder._count_zero_position_equivalences_exclusively_between(50, 250, 100) == 2
+
+    def test_count_zero_position_equivalences_exclusively_between_negative_shift_no_matches(self, finder):
+        """Test negative shift with no zero position equivalents in between"""
+        assert finder._count_zero_position_equivalences_exclusively_between(30, -20, 100) == 0
+
+    def test_count_zero_position_equivalences_exclusively_between_negative_shift_single_match(self, finder):
+        """Test negative shift crossing one zero position equivalent"""
+        assert finder._count_zero_position_equivalences_exclusively_between(150, -60, 100) == 1
+
+    def test_count_zero_position_equivalences_exclusively_between_negative_shift_multiple_matches(self, finder):
+        """Test negative shift crossing multiple zero position equivalents"""
+        assert finder._count_zero_position_equivalences_exclusively_between(250, -250, 100) == 2
+
+    def test_count_zero_position_equivalences_exclusively_between_zero_shift(self, finder):
+        """Test with zero shift (no movement)"""
+        assert finder._count_zero_position_equivalences_exclusively_between(50, 0, 100) == 0
+
+    def test_count_zero_position_equivalences_exclusively_between_starting_at_zero_equivalent(self, finder):
+        """Test starting exactly at zero position equivalent"""
+        assert finder._count_zero_position_equivalences_exclusively_between(100, 50, 100) == 0
+
+    def test_count_zero_position_equivalences_exclusively_between_ending_at_zero_equivalent(self, finder):
+        """Test ending exactly at zero position equivalent (exclusive)"""
+        assert finder._count_zero_position_equivalences_exclusively_between(50, 50, 100) == 0
+
+    def test_count_zero_position_equivalences_exclusively_between_both_positions_exclusive(self, finder):
+        """Test that both start and end positions are exclusive"""
+        # From 0 to 200, should count 100 but not 0 or 200
+        assert finder._count_zero_position_equivalences_exclusively_between(0, 200, 100) == 1
+
+    def test_count_zero_position_equivalences_exclusively_between_negative_positions(self, finder):
+        """Test with negative starting position crossing zero"""
+        assert finder._count_zero_position_equivalences_exclusively_between(-150, 250, 100) == 2
+        assert finder._count_zero_position_equivalences_exclusively_between(-150, 251, 100) == 3
+
+    def test_count_zero_position_equivalences_exclusively_between_small_shift(self, finder):
+        """Test with shift smaller than n_graduations"""
+        assert finder._count_zero_position_equivalences_exclusively_between(95, 5, 100) == 0
+
+    def test_count_zero_position_equivalences_exclusively_between_exact_graduation_span(self, finder):
+        """Test shift that is exactly n_graduations"""
+        assert finder._count_zero_position_equivalences_exclusively_between(0, 100, 100) == 0
+        assert finder._count_zero_position_equivalences_exclusively_between(50, 100, 100) == 1
+

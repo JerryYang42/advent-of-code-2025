@@ -5,6 +5,7 @@ N_GRADUATIONS = 100
 DIAL_STARTING_POSITION = 50
 DATA_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'resources')
 INPUT_P1_FILENAME = 'input_p1.txt'
+INPUT_P2_FILENAME = 'input_p1.txt'
 
 # Part 1 Solution
 class SecretEntrancePasswordFinder:
@@ -23,6 +24,14 @@ class SecretEntrancePasswordFinder:
         self.cumulative_sums = self._cumulative_sum(self.shifts, self.dial_starting_position)
         return self._count_zero_position_equivalence(self.cumulative_sums)
 
+    def resolve_password_par2_2(self) -> int:
+        """Find the occurrences of zero position equivalent in the cumulative summation of shifts and during the dial rotation."""
+        self.shifts = [self._parse_instruction(instr) for instr in self.instructions]
+        self.cumulative_sums = self._cumulative_sum(self.shifts, self.dial_starting_position)
+        total_zero_position_equivalences = self._count_zero_position_equivalence(self.cumulative_sums)
+        total_zero_position_equivalences_during_rotation = sum([self._count_zero_position_equivalences_exclusively_between(x, y, self.n_graduations) for x, y in zip(self.cumulative_sums, self.shifts)])
+        return total_zero_position_equivalences + total_zero_position_equivalences_during_rotation
+    
     def _load_instructions(self) -> List[str]:
         """Load instructions from the input file."""
         def _is_valid_instruction(instruction: str) -> bool:
@@ -61,6 +70,16 @@ class SecretEntrancePasswordFinder:
         
         count = sum(1 for x in cumulative_summation if _is_divisible_by_n_graduations(x))
         return count
+    
+    def _count_zero_position_equivalences_exclusively_between(self, starting_position: int, shift: int, n_graduations: int) -> int:
+        """Count how many zero position equivalents are found between two positions. Both positions exclusive."""
+        count = 0
+
+        step = 1 if shift > 0 else -1
+        for position in range(starting_position + step, starting_position + shift, step):
+            if position % n_graduations == 0:
+                count += 1
+        return count
 
 
 if __name__ == "__main__":
@@ -69,4 +88,5 @@ if __name__ == "__main__":
     print("Answer: ", part_1_answer)
     print("")
     print("======Day 1, Part 2======")
-    print("Not yet implemented")
+    part_2_answer = SecretEntrancePasswordFinder(N_GRADUATIONS, DIAL_STARTING_POSITION, INPUT_P2_FILENAME).resolve_password_par2_2()
+    print("Answer: ", part_2_answer)
