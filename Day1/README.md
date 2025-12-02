@@ -21,13 +21,13 @@ uv pip install -e .  # enable editable mode
 Run the src file for print out result
 
 ```zsh
-python3 day1/src/main/P1.py
+python3 ./day1/src/main/SecretEntrancePasswordFinder.py
 ```
 
 Run the tests
 
 ```zsh
-uv run pytest day1/src/test/test_SecretEntrancePasswordFinder.py.py -v
+uv run pytest day1/src/test/test_SecretEntrancePasswordFinder.py -v
 ```
 
 Or run all tests:
