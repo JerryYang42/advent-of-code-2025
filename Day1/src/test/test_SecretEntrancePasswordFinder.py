@@ -1,5 +1,5 @@
 import pytest
-from day1.src.main.SecretEntrancePasswordFinder import SecretEntrancePasswordFinder
+from day1.src.main.python.SecretEntrancePasswordFinder import SecretEntrancePasswordFinder
 
 class TestSecretEntrancePasswordFinder:
     """Test suite for SecretEntrancePasswordFinder class"""

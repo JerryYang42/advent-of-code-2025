@@ -3,7 +3,7 @@ from typing import List
 
 N_GRADUATIONS = 100
 DIAL_STARTING_POSITION = 50
-DATA_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'data')
+DATA_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'resources')
 INPUT_P1_FILENAME = 'input_p1.txt'
 
 # Part 1 Solution
@@ -16,6 +16,12 @@ class SecretEntrancePasswordFinder:
         self.instruction_input_filename = instruction_input_filename
         self.instruction_input_filepath = os.path.join(DATA_FOLDER, instruction_input_filename)
         self.instructions = self._load_instructions()
+    
+    def resolve_password(self) -> int:
+        """Find the occurrences of zero position equivalent in the cumulative summation of shifts."""
+        self.shifts = [self._parse_instruction(instr) for instr in self.instructions]
+        self.cumulative_sums = self._cumulative_sum(self.shifts, self.dial_starting_position)
+        return self._count_zero_position_equivalence(self.cumulative_sums)
 
     def _load_instructions(self) -> List[str]:
         """Load instructions from the input file."""
@@ -30,12 +36,6 @@ class SecretEntrancePasswordFinder:
                 if not _is_valid_instruction(line):
                     raise ValueError("Invalid instruction found on line {}: {}".format(line_num, line))
             return lines
-    
-    def resolve_password(self) -> int:
-        """Find the occurrences of zero position equivalent in the cumulative summation of shifts."""
-        self.shifts = [self._parse_instruction(instr) for instr in self.instructions]
-        self.cumulative_sums = self._cumulative_sum(self.shifts, self.dial_starting_position)
-        return self._count_zero_position_equivalence(self.cumulative_sums)
 
     def _parse_instruction(self, instruction: str) -> int:
             """Map the instructions to shifts as signed integers, where R is positive and L is negative."""
