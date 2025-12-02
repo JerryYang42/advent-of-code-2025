@@ -22,15 +22,20 @@ class SecretEntrancePasswordFinder:
         """Find the occurrences of zero position equivalent in the cumulative summation of shifts."""
         self.shifts = [self._parse_instruction(instr) for instr in self.instructions]
         self.cumulative_sums = self._cumulative_sum(self.shifts, self.dial_starting_position)
-        return self._count_zero_position_equivalence(self.cumulative_sums)
+        return self._count_zero_position_equivalence_after_rotation(self.cumulative_sums)
 
-    def resolve_password_par2_2(self) -> int:
+    def resolve_password_part2(self) -> int:
         """Find the occurrences of zero position equivalent in the cumulative summation of shifts and during the dial rotation."""
         self.shifts = [self._parse_instruction(instr) for instr in self.instructions]
         self.cumulative_sums = self._cumulative_sum(self.shifts, self.dial_starting_position)
-        total_zero_position_equivalences = self._count_zero_position_equivalence(self.cumulative_sums)
-        total_zero_position_equivalences_during_rotation = sum([self._count_zero_position_equivalences_exclusively_between(x, y, self.n_graduations) for x, y in zip(self.cumulative_sums, self.shifts)])
-        return total_zero_position_equivalences + total_zero_position_equivalences_during_rotation
+        total_zero_position_equivalence_after_rotation = self._count_zero_position_equivalence_after_rotation(self.cumulative_sums)
+        total_zero_position_equivalences_during_rotation = self._count_zero_position_equivalences_during_rotation(
+            starting_positions=[self.dial_starting_position] + self.cumulative_sums[:-1],
+            shifts=self.shifts,
+            n_graduations=self.n_graduations
+        )
+        total = total_zero_position_equivalence_after_rotation + total_zero_position_equivalences_during_rotation
+        return total
     
     def _load_instructions(self) -> List[str]:
         """Load instructions from the input file."""
@@ -61,7 +66,7 @@ class SecretEntrancePasswordFinder:
             cumulative_sums.append(current_sum)
         return cumulative_sums
 
-    def _count_zero_position_equivalence(self, cumulative_summation: List[int]) -> int:
+    def _count_zero_position_equivalence_after_rotation(self, cumulative_summation: List[int]) -> int:
         """Count how many values in the cumulative summation are divisible by n_graduations."""
         
         def _is_divisible_by_n_graduations(position: int) -> bool:
@@ -69,6 +74,11 @@ class SecretEntrancePasswordFinder:
             return position % self.n_graduations == 0
         
         count = sum(1 for x in cumulative_summation if _is_divisible_by_n_graduations(x))
+        return count
+    
+    def _count_zero_position_equivalences_during_rotation(self, starting_positions: List[int], shifts: List[int], n_graduations: int) -> int:
+        """Count how many zero position equivalents are found during the rotation from starting_position by shift."""
+        count = sum([self._count_zero_position_equivalences_exclusively_between(starting_position, shift, n_graduations) for starting_position, shift in zip(starting_positions, shifts)])
         return count
     
     def _count_zero_position_equivalences_exclusively_between(self, starting_position: int, shift: int, n_graduations: int) -> int:
@@ -88,5 +98,5 @@ if __name__ == "__main__":
     print("Answer: ", part_1_answer)
     print("")
     print("======Day 1, Part 2======")
-    part_2_answer = SecretEntrancePasswordFinder(N_GRADUATIONS, DIAL_STARTING_POSITION, INPUT_P2_FILENAME).resolve_password_par2_2()
+    part_2_answer = SecretEntrancePasswordFinder(N_GRADUATIONS, DIAL_STARTING_POSITION, INPUT_P2_FILENAME).resolve_password_part2()
     print("Answer: ", part_2_answer)
