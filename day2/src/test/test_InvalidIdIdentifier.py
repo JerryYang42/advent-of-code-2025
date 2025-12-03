@@ -37,27 +37,27 @@ class TestIsAProbableRange:
     
     def test_probable_range_both_even_length(self, identifier):
         """Test range with both even-length numbers."""
-        assert identifier._is_a_probable_range((10, 99)) is True
+        assert identifier._is_a_probable_range((10, 99), 2) is True
     
     def test_probable_range_both_odd_length_same_digits(self, identifier):
         """Test range with both odd-length numbers with same digit count."""
-        assert identifier._is_a_probable_range((100, 999)) is False
+        assert identifier._is_a_probable_range((100, 999), 2) is False
     
     def test_probable_range_both_odd_length_different_digits(self, identifier):
         """Test range with both odd-length numbers with different digit counts."""
-        assert identifier._is_a_probable_range((100, 10000)) is True
+        assert identifier._is_a_probable_range((100, 10000), 2) is True
     
     def test_probable_range_start_odd_end_even(self, identifier):
         """Test range with odd-length start and even-length end."""
-        assert identifier._is_a_probable_range((100, 1000)) is True
+        assert identifier._is_a_probable_range((100, 1000), 2) is True
     
     def test_probable_range_start_even_end_odd(self, identifier):
         """Test range with even-length start and odd-length end."""
-        assert identifier._is_a_probable_range((10, 100)) is True
+        assert identifier._is_a_probable_range((10, 100), 2) is True
     
     def test_probable_range_single_digit_odd(self, identifier):
         """Test range with single-digit (odd-length) numbers."""
-        assert identifier._is_a_probable_range((1, 9)) is False
+        assert identifier._is_a_probable_range((1, 9), 2) is False
 
 
 class TestLoadRangesFromTxt:
@@ -126,34 +126,39 @@ class TestLeftHalf:
         with pytest.raises(AssertionError):
             identifier._left_half(12345)
 
-class TestGenerateInvalidIdFromHalf:
+class TestDivisiableLengthBy:
     
-    def test_generate_invalid_id_from_half(self, identifier):
-        """Test invalid ID generation from left half."""
-        assert identifier._generate_invalid_id_from_half(12) == 1212
-        assert identifier._generate_invalid_id_from_half(5) == 55
+    def test_divisible_length_by_true(self, identifier):
+        """Test divisible length by returns True."""
+        assert identifier._divisible_length_by(1234, 2) is True
+        assert identifier._divisible_length_by(123456, 3) is True
+    
+    def test_divisible_length_by_false(self, identifier):
+        """Test divisible length by returns False."""
+        assert identifier._divisible_length_by(12345, 2) is False
+        assert identifier._divisible_length_by(1234, 3) is False
 
 class TestGenerateInvalidIdsInRangeWithinSameMagnitude:
     
     def test_generate_invalid_ids_in_range(self, identifier):
         """Test generating invalid IDs in a given range."""
-        result = identifier.generate_invalid_ids_in_range_within_same_magnitude((1000, 1999))
+        result = identifier.generate_invalid_ids_in_range_within_same_magnitude((1000, 1999), 2)
         expected = [1010, 1111, 1212, 1313, 1414, 1515, 1616, 1717, 1818, 1919]
         assert result == expected
     
     def test_generate_invalid_ids_no_invalids(self, identifier):
         """Test range with no invalid IDs."""
-        result = identifier.generate_invalid_ids_in_range_within_same_magnitude((100, 199))
+        result = identifier.generate_invalid_ids_in_range_within_same_magnitude((100, 199), 2)
         assert result == []
     
     def test_generate_invalid_ids_single_value_range(self, identifier):
         """Test range with a single value that is invalid."""
-        result = identifier.generate_invalid_ids_in_range_within_same_magnitude((1212, 1212))
+        result = identifier.generate_invalid_ids_in_range_within_same_magnitude((1212, 1212), 2)
         assert result == [1212]
     
     def test_generate_invalid_ids_single_value_range_not_invalid(self, identifier):
         """Test range with a single value that is not invalid."""
-        result = identifier.generate_invalid_ids_in_range_within_same_magnitude((1234, 1234))
+        result = identifier.generate_invalid_ids_in_range_within_same_magnitude((1234, 1234), 2)
         assert result == []
 
 class TestBreakdownRangeIntoMagnitudes:

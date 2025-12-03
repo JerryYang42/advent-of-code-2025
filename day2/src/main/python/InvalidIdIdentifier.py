@@ -21,13 +21,13 @@ class InvalidIdIdentifier():
         for pair in self.ranges:
             ranges_of_same_magnitude.extend(self._breakdown_range_into_magnitudes(pair))
         for pair in ranges_of_same_magnitude:
-            invalid_ids.extend(self.generate_invalid_ids_in_range_within_same_magnitude(pair))
+            invalid_ids.extend(self.generate_invalid_ids_in_range_within_same_magnitude(pair, 2))
         return invalid_ids
 
-    def generate_invalid_ids_in_range_within_same_magnitude(self, pair: tuple) -> list:
+    def generate_invalid_ids_in_range_within_same_magnitude(self, pair: tuple, repeating_count: int) -> list:
         """Search for invalid IDs in the given range."""
         assert self._digits(pair[0]) == self._digits(pair[1]), "Range must be within the same magnitude."
-        if not self._is_a_probable_range(pair):
+        if not self._is_a_probable_range(pair, repeating_count):
             return []
 
         invalid_ids = []
@@ -52,26 +52,17 @@ class InvalidIdIdentifier():
             ranges.append((current_start, current_end))
             current_start = current_end + 1
         return ranges
-
-    @DeprecationWarning
-    def _generate_invalid_id_from_half(self, half: int) -> int:
-        """Generate an invalid ID from its left half."""
-        str_half = str(half)
-        return int(str_half + str_half)
     
     def _generating_invalid_ids(self, repeating_unit: int, repeat_count: int) -> int:
         """Generate an invalid ID by repeating a unit."""
         str_unit = str(repeating_unit)
         return int(str_unit * repeat_count)
 
-    def _is_a_probable_range(self, pair: tuple) -> bool:
+    def _is_a_probable_range(self, pair: tuple, repeating_count: int) -> bool:
         """A probable range is one where there is a chance of having invalid IDs."""
         start, _ = pair
         if self._is_same_magnitude(pair):
-            if self._is_odd_length(start):
-                return False
-            else:
-                return True
+            return self._divisible_length_by(start, repeating_count)
         return True
     
     def _is_same_magnitude(self, pair: tuple) -> bool:
@@ -84,12 +75,12 @@ class InvalidIdIdentifier():
     def _is_odd_length(self, value: int) -> bool:
         return self._digits(value) % 2 != 0
     
-    def _is_even_length(self, value: int) -> bool:
-        return self._digits(value) % 2 == 0
+    def _divisible_length_by(self, value: int, divisor: int) -> bool:
+        return self._digits(value) % divisor == 0
     
     def _left_half(self, value: int) -> int:
         """Get the left half of a number with an even number of digits."""
-        assert self._is_even_length(value), "Value must have an even number of digits."
+        assert self._divisible_length_by(value, 2), "Value must have an even number of digits."
         mid = self._digits(value) // 2
         str_value = str(value)
         return int(str_value[:mid])
