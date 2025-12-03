@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Tuple
 
 RESOURCES_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'resources')
 
@@ -33,14 +33,28 @@ class InvalidIdIdentifier():
             return []
 
         invalid_ids = []
-
-        seed_window_start = self._left_half(start)
-        seed_window_end = self._left_half(end)
-        for half in range(seed_window_start, seed_window_end + 1):
+        seed_unit_start = self._first_repeating_unit(start, repeating_count)
+        seed_unit_end = self._first_repeating_unit(end, repeating_count)
+        for half in range(seed_unit_start, seed_unit_end + 1):
             invalid_id = self._generating_invalid_ids(half, repeating_count)
             if start <= invalid_id <= end:
                 invalid_ids.append(invalid_id)
         return invalid_ids
+    
+    def _first_repeating_unit(self, value: int, repeat_count: int) -> int:
+        """Get the repeating unit from a value based on repeat count."""
+        assert self._divisible_length_by(value, repeat_count), "Value length must be divisible by repeat count."
+        str_value = str(value)
+        repeating_unit_length = len(str_value) // repeat_count
+        first_repeating_unit = str_value[:repeating_unit_length]
+        return int(first_repeating_unit)
+    
+    def _left_half(self, value: int) -> int:
+        """Get the left half of a number with an even number of digits."""
+        assert self._divisible_length_by(value, 2), "Value must have an even number of digits."
+        mid = self._digits(value) // 2
+        str_value = str(value)
+        return int(str_value[:mid])
     
     def _breakdown_range_into_magnitudes(self, start: int, end: int) -> list:
         """Break down a range into sub-ranges of the same magnitude."""
@@ -76,13 +90,6 @@ class InvalidIdIdentifier():
     
     def _divisible_length_by(self, value: int, divisor: int) -> bool:
         return self._digits(value) % divisor == 0
-    
-    def _left_half(self, value: int) -> int:
-        """Get the left half of a number with an even number of digits."""
-        assert self._divisible_length_by(value, 2), "Value must have an even number of digits."
-        mid = self._digits(value) // 2
-        str_value = str(value)
-        return int(str_value[:mid])
 
     def _load_ranges_from_txt(self, filename: str) -> list:
         lines = []
