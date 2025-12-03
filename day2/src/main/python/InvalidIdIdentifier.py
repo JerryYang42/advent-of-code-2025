@@ -1,5 +1,6 @@
+from math import sqrt
 import os
-from typing import List
+from typing import List, Tuple
 
 RESOURCES_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'resources')
 
@@ -8,42 +9,62 @@ class InvalidIdIdentifier():
     def __init__(self, input_filename: str):
         self.input_filename = input_filename
         self.ranges = self._load_ranges_from_txt(input_filename)
+
+    # Part 1
+    def resolve_when_invalid_id_means_repeating_twice(self) -> List[int]:
+        """Resolve the number of invalid IDs when invalid IDs are those with repeating twice."""
+        invalid_ids = self.search_invalid_ids_in_ranges(2)
+        return invalid_ids
     
-    def sum_of_invalid_ids_in_ranges(self) -> int:
-        """Sum of invalid IDs in all loaded ranges."""
-        invalid_ids = self.search_invalid_ids_in_ranges()
-        return sum(invalid_ids)
+    # Part 2
+    def resolve_when_invalid_id_means_repeating_at_least_twice(self) -> List[int]:
+        """Resolve the number of invalid IDs when invalid IDs are those with repeating at least twice."""
+        max_range_end = max([pair[1] for pair in self.ranges])
+        min_repeating_count = 2
+        max_repeating_count = len(str(max_range_end))
+
+        invalid_ids = []
+        for repeating_count in range(min_repeating_count, max_repeating_count + 1):
+            invalid_ids.extend(self.search_invalid_ids_in_ranges(repeating_count))
+        return list(set(invalid_ids))  # Remove duplicates
     
-    def search_invalid_ids_in_ranges(self) -> List[int]:
+    def search_invalid_ids_in_ranges(self, repeating_count: int) -> List[int]:
         """Search for invalid IDs in all loaded ranges."""
         invalid_ids = []
         ranges_of_same_magnitude = []
         for pair in self.ranges:
-            ranges_of_same_magnitude.extend(self._breakdown_range_into_magnitudes(pair))
+            start, end = pair
+            ranges_of_same_magnitude.extend(self._breakdown_range_into_magnitudes(start, end))
         for pair in ranges_of_same_magnitude:
-            invalid_ids.extend(self.generate_invalid_ids_in_range_within_same_magnitude(pair))
+            start, end = pair
+            invalid_ids.extend(self.generate_invalid_ids_in_range_within_same_magnitude(start, end, repeating_count))
         return invalid_ids
 
-    def generate_invalid_ids_in_range_within_same_magnitude(self, pair: tuple) -> list:
+    def generate_invalid_ids_in_range_within_same_magnitude(self, start: int, end: int, repeating_count: int) -> list:
         """Search for invalid IDs in the given range."""
-        assert self._digits(pair[0]) == self._digits(pair[1]), "Range must be within the same magnitude."
-        if not self._is_a_probable_range(pair):
+        assert self._digits(start) == self._digits(end), "Range must be within the same magnitude."
+        if not self._is_a_probable_range(start, end, repeating_count):
             return []
 
         invalid_ids = []
-
-        start, end = pair
-        seed_window_start = self._left_half(start)
-        seed_window_end = self._left_half(end)
-        for half in range(seed_window_start, seed_window_end + 1):
-            invalid_id = self._generate_invalid_id_from_half(half)
+        seed_unit_start = self._first_repeating_unit(start, repeating_count)
+        seed_unit_end = self._first_repeating_unit(end, repeating_count)
+        for half in range(seed_unit_start, seed_unit_end + 1):
+            invalid_id = self._generating_invalid_ids(half, repeating_count)
             if start <= invalid_id <= end:
                 invalid_ids.append(invalid_id)
         return invalid_ids
     
-    def _breakdown_range_into_magnitudes(self, pair: tuple) -> list:
+    def _first_repeating_unit(self, value: int, repeat_count: int) -> int:
+        """Get the repeating unit from a value based on repeat count."""
+        assert self._divisible_length_by(value, repeat_count), "Value length must be divisible by repeat count."
+        str_value = str(value)
+        repeating_unit_length = len(str_value) // repeat_count
+        first_repeating_unit = str_value[:repeating_unit_length]
+        return int(first_repeating_unit)
+    
+    def _breakdown_range_into_magnitudes(self, start: int, end: int) -> list:
         """Break down a range into sub-ranges of the same magnitude."""
-        start, end = pair
         ranges = []
         current_start = start
         while current_start <= end:
@@ -52,25 +73,21 @@ class InvalidIdIdentifier():
             ranges.append((current_start, current_end))
             current_start = current_end + 1
         return ranges
+    
+    def _generating_invalid_ids(self, repeating_unit: int, repeat_count: int) -> int:
+        """Generate an invalid ID by repeating a unit."""
+        str_unit = str(repeating_unit)
+        return int(str_unit * repeat_count)
 
-    def _generate_invalid_id_from_half(self, half: int) -> int:
-        """Generate an invalid ID from its left half."""
-        str_half = str(half)
-        return int(str_half + str_half)
-
-    def _is_a_probable_range(self, pair: tuple) -> bool:
+    def _is_a_probable_range(self, start: int, end: int, repeating_count: int) -> bool:
         """A probable range is one where there is a chance of having invalid IDs."""
-        start, _ = pair
-        if self._is_same_magnitude(pair):
-            if self._is_odd_length(start):
-                return False
-            else:
-                return True
+        if self._is_same_magnitude(start, end):
+            return self._divisible_length_by(start, repeating_count)
         return True
     
-    def _is_same_magnitude(self, pair: tuple) -> bool:
+    def _is_same_magnitude(self, start: int, end: int) -> bool:
         """Check if both numbers in the range have the same number of digits."""
-        return self._digits(pair[0]) == self._digits(pair[1])
+        return self._digits(start) == self._digits(end)
     
     def _digits(self, value: int) -> int:
             return len(str(value))
@@ -78,15 +95,8 @@ class InvalidIdIdentifier():
     def _is_odd_length(self, value: int) -> bool:
         return self._digits(value) % 2 != 0
     
-    def _is_even_length(self, value: int) -> bool:
-        return self._digits(value) % 2 == 0
-    
-    def _left_half(self, value: int) -> int:
-        """Get the left half of a number with an even number of digits."""
-        assert self._is_even_length(value), "Value must have an even number of digits."
-        mid = self._digits(value) // 2
-        str_value = str(value)
-        return int(str_value[:mid])
+    def _divisible_length_by(self, value: int, divisor: int) -> bool:
+        return self._digits(value) % divisor == 0
 
     def _load_ranges_from_txt(self, filename: str) -> list:
         lines = []
@@ -135,8 +145,10 @@ if __name__ == "__main__":
     identifier = InvalidIdIdentifier('input.txt')
 
     print("======Day 2, Part 1======")
-    invalid_ids = identifier.search_invalid_ids_in_ranges()
+    invalid_ids = identifier.resolve_when_invalid_id_means_repeating_twice()
     print("Number of invalid IDs found:", len(invalid_ids))
-    print("Sum of invalid IDs found:", identifier.sum_of_invalid_ids_in_ranges())
+    print("Sum of invalid IDs found:", sum(invalid_ids))
     print("======Day 2, Part 2======")
-    print("Not implemented yet.")
+    invalid_ids_part2 = identifier.resolve_when_invalid_id_means_repeating_at_least_twice()
+    print("Number of invalid IDs found:", len(invalid_ids_part2))
+    print("Sum of invalid IDs found:", sum(invalid_ids_part2))
