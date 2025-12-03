@@ -9,41 +9,41 @@ class InvalidIdIdentifier():
         self.input_filename = input_filename
         self.ranges = self._load_ranges_from_txt(input_filename)
     
-    def sum_of_invalid_ids_in_ranges(self) -> int:
+    def sum_of_invalid_ids_in_ranges(self, repeating_count: int) -> int:
         """Sum of invalid IDs in all loaded ranges."""
-        invalid_ids = self.search_invalid_ids_in_ranges()
+        invalid_ids = self.search_invalid_ids_in_ranges(repeating_count)
         return sum(invalid_ids)
     
-    def search_invalid_ids_in_ranges(self) -> List[int]:
+    def search_invalid_ids_in_ranges(self, repeating_count: int) -> List[int]:
         """Search for invalid IDs in all loaded ranges."""
         invalid_ids = []
         ranges_of_same_magnitude = []
         for pair in self.ranges:
-            ranges_of_same_magnitude.extend(self._breakdown_range_into_magnitudes(pair))
+            start, end = pair
+            ranges_of_same_magnitude.extend(self._breakdown_range_into_magnitudes(start, end))
         for pair in ranges_of_same_magnitude:
-            invalid_ids.extend(self.generate_invalid_ids_in_range_within_same_magnitude(pair, 2))
+            start, end = pair
+            invalid_ids.extend(self.generate_invalid_ids_in_range_within_same_magnitude(start, end, repeating_count))
         return invalid_ids
 
-    def generate_invalid_ids_in_range_within_same_magnitude(self, pair: tuple, repeating_count: int) -> list:
+    def generate_invalid_ids_in_range_within_same_magnitude(self, start: int, end: int, repeating_count: int) -> list:
         """Search for invalid IDs in the given range."""
-        assert self._digits(pair[0]) == self._digits(pair[1]), "Range must be within the same magnitude."
-        if not self._is_a_probable_range(pair, repeating_count):
+        assert self._digits(start) == self._digits(end), "Range must be within the same magnitude."
+        if not self._is_a_probable_range(start, end, repeating_count):
             return []
 
         invalid_ids = []
 
-        start, end = pair
         seed_window_start = self._left_half(start)
         seed_window_end = self._left_half(end)
         for half in range(seed_window_start, seed_window_end + 1):
-            invalid_id = self._generating_invalid_ids(half, 2)
+            invalid_id = self._generating_invalid_ids(half, repeating_count)
             if start <= invalid_id <= end:
                 invalid_ids.append(invalid_id)
         return invalid_ids
     
-    def _breakdown_range_into_magnitudes(self, pair: tuple) -> list:
+    def _breakdown_range_into_magnitudes(self, start: int, end: int) -> list:
         """Break down a range into sub-ranges of the same magnitude."""
-        start, end = pair
         ranges = []
         current_start = start
         while current_start <= end:
@@ -58,16 +58,15 @@ class InvalidIdIdentifier():
         str_unit = str(repeating_unit)
         return int(str_unit * repeat_count)
 
-    def _is_a_probable_range(self, pair: tuple, repeating_count: int) -> bool:
+    def _is_a_probable_range(self, start: int, end: int, repeating_count: int) -> bool:
         """A probable range is one where there is a chance of having invalid IDs."""
-        start, _ = pair
-        if self._is_same_magnitude(pair):
+        if self._is_same_magnitude(start, end):
             return self._divisible_length_by(start, repeating_count)
         return True
     
-    def _is_same_magnitude(self, pair: tuple) -> bool:
+    def _is_same_magnitude(self, start: int, end: int) -> bool:
         """Check if both numbers in the range have the same number of digits."""
-        return self._digits(pair[0]) == self._digits(pair[1])
+        return self._digits(start) == self._digits(end)
     
     def _digits(self, value: int) -> int:
             return len(str(value))
@@ -132,8 +131,8 @@ if __name__ == "__main__":
     identifier = InvalidIdIdentifier('input.txt')
 
     print("======Day 2, Part 1======")
-    invalid_ids = identifier.search_invalid_ids_in_ranges()
+    invalid_ids = identifier.search_invalid_ids_in_ranges(2)
     print("Number of invalid IDs found:", len(invalid_ids))
-    print("Sum of invalid IDs found:", identifier.sum_of_invalid_ids_in_ranges())
+    print("Sum of invalid IDs found:", identifier.sum_of_invalid_ids_in_ranges(2))
     print("======Day 2, Part 2======")
     print("Not implemented yet.")
