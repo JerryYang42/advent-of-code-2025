@@ -1,3 +1,4 @@
+from math import sqrt
 import os
 from typing import List, Tuple
 
@@ -8,11 +9,24 @@ class InvalidIdIdentifier():
     def __init__(self, input_filename: str):
         self.input_filename = input_filename
         self.ranges = self._load_ranges_from_txt(input_filename)
+
+    # Part 1
+    def resolve_when_invalid_id_means_repeating_twice(self) -> List[int]:
+        """Resolve the number of invalid IDs when invalid IDs are those with repeating twice."""
+        invalid_ids = self.search_invalid_ids_in_ranges(2)
+        return invalid_ids
     
-    def sum_of_invalid_ids_in_ranges(self, repeating_count: int) -> int:
-        """Sum of invalid IDs in all loaded ranges."""
-        invalid_ids = self.search_invalid_ids_in_ranges(repeating_count)
-        return sum(invalid_ids)
+    # Part 2
+    def resolve_when_invalid_id_means_repeating_at_least_twice(self) -> List[int]:
+        """Resolve the number of invalid IDs when invalid IDs are those with repeating at least twice."""
+        max_range_end = max([pair[1] for pair in self.ranges])
+        min_repeating_count = 2
+        max_repeating_count = len(str(max_range_end))
+
+        invalid_ids = []
+        for repeating_count in range(min_repeating_count, max_repeating_count + 1):
+            invalid_ids.extend(self.search_invalid_ids_in_ranges(repeating_count))
+        return list(set(invalid_ids))  # Remove duplicates
     
     def search_invalid_ids_in_ranges(self, repeating_count: int) -> List[int]:
         """Search for invalid IDs in all loaded ranges."""
@@ -131,8 +145,10 @@ if __name__ == "__main__":
     identifier = InvalidIdIdentifier('input.txt')
 
     print("======Day 2, Part 1======")
-    invalid_ids = identifier.search_invalid_ids_in_ranges(2)
+    invalid_ids = identifier.resolve_when_invalid_id_means_repeating_twice()
     print("Number of invalid IDs found:", len(invalid_ids))
-    print("Sum of invalid IDs found:", identifier.sum_of_invalid_ids_in_ranges(2))
+    print("Sum of invalid IDs found:", sum(invalid_ids))
     print("======Day 2, Part 2======")
-    print("Not implemented yet.")
+    invalid_ids_part2 = identifier.resolve_when_invalid_id_means_repeating_at_least_twice()
+    print("Number of invalid IDs found:", len(invalid_ids_part2))
+    print("Sum of invalid IDs found:", sum(invalid_ids_part2))
