@@ -49,13 +49,6 @@ class InvalidIdIdentifier():
         first_repeating_unit = str_value[:repeating_unit_length]
         return int(first_repeating_unit)
     
-    def _left_half(self, value: int) -> int:
-        """Get the left half of a number with an even number of digits."""
-        assert self._divisible_length_by(value, 2), "Value must have an even number of digits."
-        mid = self._digits(value) // 2
-        str_value = str(value)
-        return int(str_value[:mid])
-    
     def _breakdown_range_into_magnitudes(self, start: int, end: int) -> list:
         """Break down a range into sub-ranges of the same magnitude."""
         ranges = []
