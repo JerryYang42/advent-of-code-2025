@@ -36,7 +36,7 @@ class InvalidIdIdentifier():
         seed_window_start = self._left_half(start)
         seed_window_end = self._left_half(end)
         for half in range(seed_window_start, seed_window_end + 1):
-            invalid_id = self._generate_invalid_id_from_half(half)
+            invalid_id = self._generating_invalid_ids(half, 2)
             if start <= invalid_id <= end:
                 invalid_ids.append(invalid_id)
         return invalid_ids
@@ -53,10 +53,16 @@ class InvalidIdIdentifier():
             current_start = current_end + 1
         return ranges
 
+    @DeprecationWarning
     def _generate_invalid_id_from_half(self, half: int) -> int:
         """Generate an invalid ID from its left half."""
         str_half = str(half)
         return int(str_half + str_half)
+    
+    def _generating_invalid_ids(self, repeating_unit: int, repeat_count: int) -> int:
+        """Generate an invalid ID by repeating a unit."""
+        str_unit = str(repeating_unit)
+        return int(str_unit * repeat_count)
 
     def _is_a_probable_range(self, pair: tuple) -> bool:
         """A probable range is one where there is a chance of having invalid IDs."""
