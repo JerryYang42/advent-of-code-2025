@@ -1,3 +1,4 @@
+from asyncio import sleep
 import os
 from enum import Enum
 from copy import deepcopy
@@ -16,6 +17,41 @@ class ForkliftAccessiblePaperRollLocater:
     
     def __init__(self):
         self.map = None
+
+    def iteratively_remove_forklift_accessible_paper_rolls(self):
+        """Iteratively remove forklift-accessible paper rolls until none remain."""
+        while True:
+            result_map = self.locate_forklift_accessible_paper_rolls()
+            n_forklift_accessible_paper_rolls = self.count_forklift_accessible_paper_rolls(result_map)
+            if n_forklift_accessible_paper_rolls == 0:
+                break
+            self.map = result_map
+            self.remove_forklift_accessible_paper_rolls(inplace=True)
+
+    def count_paper_rolls(self):
+        return sum(row.count(Symbol.PAPER_ROLL) for row in self.map) + sum(row.count(Symbol.FORKLIFT_ACCESSIBLE_PAPER_ROLL) for row in self.map)
+    
+    def count_forklift_accessible_paper_rolls(self, result_map):
+        return sum(row.count(Symbol.FORKLIFT_ACCESSIBLE_PAPER_ROLL) for row in result_map)
+
+    def remove_forklift_accessible_paper_rolls(self, inplace: bool = True):
+        """Remove forklift-accessible paper rolls from the map."""
+        rows = len(self.map)
+        cols = len(self.map[0]) if rows > 0 else 0
+        if inplace:
+            for r in range(rows):
+                for c in range(cols):
+                    if self.map[r][c] == Symbol.FORKLIFT_ACCESSIBLE_PAPER_ROLL:
+                        self.map[r][c] = Symbol.SPACE
+                        return self.map
+        else:
+            new_map = deepcopy(self.map)
+            for r in range(rows):
+                for c in range(cols):
+                    if new_map[r][c] == Symbol.FORKLIFT_ACCESSIBLE_PAPER_ROLL:
+                        new_map[r][c] = Symbol.SPACE
+            return new_map
+
 
     def locate_forklift_accessible_paper_rolls(self):
         """Locate forklift-accessible paper rolls in the map."""
@@ -73,7 +109,7 @@ class Printer:
             print(''.join(str(score) for score in row))
 
 if __name__ == "__main__":
-    print("======Day 1, Sample Input=======")
+    print("======Day 4, Sample Input=======")
     puzzle_input_sample_txt_filename = "puzzle_input_sample.txt"
     locater = ForkliftAccessiblePaperRollLocater()
     print("Original Map:")
@@ -89,9 +125,28 @@ if __name__ == "__main__":
     locater.load_map(puzzle_input_sample_answer_txt_filename)
     Printer.print_map(locater.map)
 
-    print("======Day 1, Part 1=======")
+    print("======Day 4, Part 1=======")
     puzzle_input_txt_filename = "puzzle_input.txt"
     locater.load_map(puzzle_input_txt_filename)
     result_map = locater.locate_forklift_accessible_paper_rolls()
     n_folklift_accessible_paper_rolls = sum(row.count(Symbol.FORKLIFT_ACCESSIBLE_PAPER_ROLL) for row in result_map)
     print(f"Number of forklift-accessible paper rolls: {n_folklift_accessible_paper_rolls}")
+
+    print("======Day 4, Part 2=======")
+    print("Sample results:")
+    locater.load_map(puzzle_input_sample_txt_filename)
+    n_paperrolls_before = locater.count_paper_rolls()
+    print(f"Number of paper rolls before iterations: {n_paperrolls_before}")
+    locater.iteratively_remove_forklift_accessible_paper_rolls()
+    n_paperrolls_after = locater.count_paper_rolls()
+    print(f"Number of paper rolls after iterations: {n_paperrolls_after}")
+    print(f"Number of removed paper rolls: {n_paperrolls_before - n_paperrolls_after}")
+    print("")
+    print("Puzzle results:")
+    locater.load_map(puzzle_input_txt_filename)
+    n_paperrolls_before = locater.count_paper_rolls()
+    print(f"Number of paper rolls before iterations: {n_paperrolls_before}")
+    locater.iteratively_remove_forklift_accessible_paper_rolls()
+    n_paperrolls_after = locater.count_paper_rolls()
+    print(f"Number of paper rolls after iterations: {n_paperrolls_after}")
+    print(f"Number of removed paper rolls: {n_paperrolls_before - n_paperrolls_after}")
